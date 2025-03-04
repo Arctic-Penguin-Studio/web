@@ -27,8 +27,9 @@ const maxParticles = 100;
 // Blocks array
 let blocks = [];
 
-// Mouse controls
+// Mouse and touch controls
 document.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("touchmove", touchMoveHandler, { passive: false });
 
 // Add resize event listener
 window.addEventListener("resize", handleResize, false);
@@ -67,15 +68,16 @@ function handleResize() {
                 ctx.font = "30px 'Courier New'";
                 ctx.fillStyle = "#FFFF00";
                 ctx.textAlign = "center";
-                ctx.fillText("MOVE MOUSE HERE TO START", canvas.width/2, canvas.height/2);
+                ctx.fillText("CLICK OR TOUCH TO START", canvas.width/2, canvas.height/2);
             }
         }
     }
 }
 
-// Add event listeners for mouse enter/leave
+// Add event listeners for mouse/touch events
 function setupCanvasEvents() {
     if (canvas) {
+        // Mouse enter/leave events
         canvas.addEventListener("mouseenter", function() {
             if (gamePaused && gameRunning) {
                 resumeGame();
@@ -86,6 +88,26 @@ function setupCanvasEvents() {
 
         canvas.addEventListener("mouseleave", function() {
             if (gameRunning && !gamePaused) {
+                pauseGame();
+            }
+        });
+
+        // Touch events for mobile/touchpad
+        canvas.addEventListener("touchstart", function() {
+            if (gamePaused && gameRunning) {
+                resumeGame();
+            } else if (!gameRunning) {
+                startGame();
+            }
+        }, { passive: true });
+
+        // Add click event as an alternative way to start/pause
+        canvas.addEventListener("click", function() {
+            if (gamePaused && gameRunning) {
+                resumeGame();
+            } else if (!gameRunning) {
+                startGame();
+            } else {
                 pauseGame();
             }
         });
@@ -102,16 +124,31 @@ function mouseMoveHandler(e) {
     }
 }
 
+function touchMoveHandler(e) {
+    // Prevent scrolling when touching the canvas
+    e.preventDefault();
+
+    if (e.touches.length > 0) {
+        let rect = canvas.getBoundingClientRect();
+        let relativeX = e.touches[0].clientX - rect.left;
+
+        // Keep paddle within boundaries
+        if(relativeX > paddleWidth/2 && relativeX < canvas.width - paddleWidth/2) {
+            paddleX = relativeX - paddleWidth/2;
+        }
+    }
+}
+
 function createBlocks() {
     blocks = [];
 
     // Define the text to show with adjusted block sizes
-    const lines = [
-        { text: "ARCTIC", y: 70, blockSize: 15 },
-        { text: "PENGUIN", y: 130, blockSize: 15 },
-        { text: "STUDIO", y: 190, blockSize: 15 },
-        { text: "MAKING GAMES", y: 250, blockSize: 10 },
-        { text: "SINCE 1998", y: 290, blockSize: 10 }
+            const lines = [
+        { text: "ARCTIC", y: 50, blockSize: 12 },
+        { text: "PENGUIN", y: 100, blockSize: 12 },
+        { text: "STUDIO", y: 150, blockSize: 12 },
+        { text: "MAKING GAMES", y: 200, blockSize: 8 },
+        { text: "SINCE 1998", y: 230, blockSize: 8 }
     ];
 
     // Create blocks for each line of text
@@ -501,10 +538,36 @@ function drawBall() {
 
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight - 450, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, canvas.height - paddleHeight - 20, paddleWidth, paddleHeight);
     ctx.fillStyle = "#00FFFF";
     ctx.fill();
     ctx.closePath();
+}
+
+// Add keyboard controls
+document.addEventListener("keydown", keyDownHandler, false);
+
+function keyDownHandler(e) {
+    // Left arrow or A key
+    if(e.key == "ArrowLeft" || e.key == "a" || e.key == "A") {
+        // Move paddle left by 20px
+        paddleX = Math.max(0, paddleX - 20);
+    }
+    // Right arrow or D key
+    else if(e.key == "ArrowRight" || e.key == "d" || e.key == "D") {
+        // Move paddle right by 20px
+        paddleX = Math.min(canvas.width - paddleWidth, paddleX + 20);
+    }
+    // Spacebar to pause/resume
+    else if(e.key == " ") {
+        if(gamePaused) {
+            resumeGame();
+        } else if(gameRunning) {
+            pauseGame();
+        } else {
+            startGame();
+        }
+    }
 }
 
 // Add a stroke outline around blocks
@@ -568,7 +631,7 @@ function draw() {
         ballSpeedY = -ballSpeedY;
     }
     // Paddle collision or bottom miss
-    else if(ballY + ballSpeedY > canvas.height - ballRadius - 450) {
+    else if(ballY + ballSpeedY > canvas.height - ballRadius - 20) {
         if(ballX > paddleX && ballX < paddleX + paddleWidth) {
             // Adjust ball direction based on where it hits the paddle
             let hitPosition = (ballX - paddleX) / paddleWidth;
@@ -676,9 +739,9 @@ window.onload = function() {
     drawBall();
     drawPaddle();
 
-    // Display "MOVE MOUSE HERE" message
+    // Display start message
     ctx.font = "30px 'Courier New'";
     ctx.fillStyle = "#FFFF00";
     ctx.textAlign = "center";
-    ctx.fillText("MOVE MOUSE HERE TO START", canvas.width/2, canvas.height/2);
+    ctx.fillText("CLICK OR TOUCH TO START", canvas.width/2, canvas.height/2);
 };

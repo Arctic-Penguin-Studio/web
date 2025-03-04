@@ -6,16 +6,21 @@ body {
     margin: 0;
     padding: 0;
     background-image: none;
-    overflow: hidden;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .game-container {
-    margin: 0;
     width: 100%;
-    height: 100vh;
+    height: 70vh;
     background-color: #000000;
     position: relative;
     border: none;
+    margin-bottom: 20px;
 }
 
 #game-canvas {
@@ -52,13 +57,12 @@ body {
 }
 
 .features {
-    position: absolute;
-    bottom: 200px;
-    width: 90%;
-    left: 5%;
     display: flex;
     justify-content: space-between;
-    padding: 0;
+    flex-wrap: wrap;
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px 0;
 }
 
 .feature-card {
@@ -67,7 +71,7 @@ body {
     padding: 15px;
     width: 28%;
     text-align: center;
-    margin: 0 10px;
+    margin: 0 10px 20px;
 }
 
 .feature-card h2 {
@@ -81,4 +85,21 @@ body {
     color: #fff;
     font-size: 14px;
     font-family: 'PressStart2P', monospace;
+}
+
+/* For smaller screens, stack the cards */
+@media (max-width: 768px) {
+    .game-container {
+        height: 60vh;
+    }
+
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature-card {
+        width: 80%;
+        margin-bottom: 15px;
+    }
 }
